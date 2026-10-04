@@ -22,6 +22,10 @@
     disabled = false,
     autofocus = false,
     mentions = [],
+    describedBy,
+    toolbarPlacement = "top",
+    toolbarActions,
+    field,
   }: RichTextEditorProps = $props();
 
   const maxSuggestions = 8;
@@ -97,6 +101,7 @@
         markdown: initialMarkdown,
         placeholder,
         label,
+        describedBy,
         autofocus,
         onUpdate: (updated) => {
           lastMarkdown = trimBlankLines(updated.getMarkdown());
@@ -136,15 +141,45 @@
 
 </script>
 
-<div class="trakt-rich-text-editor" class:is-disabled={disabled}>
-  <RichTextToolbar {editor} {toolbarState} {disabled} {mentions} />
+{#snippet surface()}
   <div class="editor-surface" inert={disabled} {@attach mountEditor}></div>
+{/snippet}
+
+{#snippet toolbar()}
+  <RichTextToolbar
+    {editor}
+    {toolbarState}
+    {disabled}
+    {mentions}
+    actions={toolbarActions}
+  />
+{/snippet}
+
+<div
+  class="trakt-rich-text-editor"
+  class:is-disabled={disabled}
+  data-toolbar-placement={toolbarPlacement}
+>
+  {#if toolbarPlacement === "top"}
+    {@render toolbar()}
+  {/if}
+
+  {#if field}
+    {@render field(surface)}
+  {:else}
+    {@render surface()}
+  {/if}
+
   {#if suggestions.length > 0}
     <MentionList
       mentions={suggestions}
       onPick={pickSuggestion}
       {activeIndex}
     />
+  {/if}
+
+  {#if toolbarPlacement === "bottom"}
+    {@render toolbar()}
   {/if}
 </div>
 

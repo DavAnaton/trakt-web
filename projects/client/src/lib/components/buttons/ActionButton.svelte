@@ -193,6 +193,27 @@
 
   @include icon-button-ghost("#{$b}[data-style=ghost]", scale(0.92), $on);
 
+  // A ghost toggle that is on holds a wash of its accent, so the state reads
+  // at rest, not only under the pointer.
+  :global(#{$b}[data-style=ghost][aria-pressed=true]#{$on}) {
+    background-color: color-mix(
+      in srgb,
+      var(--surface-action-button) 28%,
+      transparent
+    );
+    color: var(--accent-action-button);
+  }
+
+  @include for-mouse {
+    :global(#{$b}[data-style=ghost][aria-pressed=true]:hover#{$on}) {
+      background-color: color-mix(
+        in srgb,
+        var(--surface-action-button) 40%,
+        transparent
+      );
+    }
+  }
+
   :global(#{$b}:active[disabled]),
   :global(#{$b}:active[aria-disabled=true]) {
     animation: jiggle-wiggle var(--animation-duration-jiggle-wiggle) infinite;

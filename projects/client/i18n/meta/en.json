@@ -2590,6 +2590,10 @@
       "default": "Replies must be at least 5 words.",
       "description": "Error message shown when a reply is invalid due to content length."
     },
+    "text_review_word_count": {
+      "default": "{count} of {minimum} words",
+      "description": "Quiet hint in the corner of the review field, counting the words written so far against the minimum a review needs, e.g. \"3 of 5 words\". It disappears once the minimum is met. {count} and {minimum} are whole numbers."
+    },
     "translated_value_error_comment_unknown": {
       "default": "An error occurred while posting your review. Please try again later.",
       "description": "Generic error message shown when an unknown error occurs while posting a review."

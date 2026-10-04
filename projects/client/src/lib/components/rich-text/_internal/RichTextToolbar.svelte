@@ -12,8 +12,13 @@
 
   const maxMentionMatches = 20;
 
-  const { editor, toolbarState, disabled, mentions }: RichTextToolbarProps =
-    $props();
+  const {
+    editor,
+    toolbarState,
+    disabled,
+    mentions,
+    actions: extraActions,
+  }: RichTextToolbarProps = $props();
 
   let isPickerOpen = $state(false);
   let query = $state("");
@@ -110,11 +115,11 @@
           label={action.label}
           style="ghost"
           size="small"
-          color={toolbarState[action.key] ? "purple" : "default"}
-          variant={toolbarState[action.key] ? "secondary" : "primary"}
+          color="purple"
           disabled={isInert}
           aria-pressed={toolbarState[action.key] ? "true" : "false"}
           onclick={() => editor && action.run(editor)}
+          --color-foreground="var(--color-text-secondary)"
         >
           <action.icon />
         </ActionButton>
@@ -128,14 +133,19 @@
             : m.button_label_format_mention()}
           style="ghost"
           size="small"
-          color={toolbarState.link ? "purple" : "default"}
-          variant={toolbarState.link ? "secondary" : "primary"}
+          color="purple"
           disabled={isInert}
           aria-pressed={toolbarState.link ? "true" : "false"}
           onclick={toggleMention}
+          --color-foreground="var(--color-text-secondary)"
         >
           <MentionIcon />
         </ActionButton>
+      {/if}
+
+      {#if extraActions}
+        <span class="toolbar-divider" aria-hidden="true"></span>
+        {@render extraActions()}
       {/if}
     {/if}
   </div>
@@ -157,8 +167,17 @@
 
     .toolbar-row {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
-      gap: var(--gap-xxs);
+      /* Small action buttons paint 4px past their layout box on each side,
+         so this leaves a 2px gap between the painted squares. */
+      gap: var(--ni-10);
+    }
+
+    .toolbar-divider {
+      width: var(--border-thickness-xxs);
+      height: var(--ni-20);
+      background-color: var(--color-border);
     }
 
     .mention-search {

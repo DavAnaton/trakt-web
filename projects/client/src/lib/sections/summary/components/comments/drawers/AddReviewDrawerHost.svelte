@@ -28,6 +28,8 @@
   import type { CommentsProps } from "../CommentsProps.ts";
 
   import { gifPop } from "./_internal/gifPop.ts";
+  import { MIN_REVIEW_WORDS } from "./constants.ts";
+  import { countReviewWords } from "./countReviewWords.ts";
   import { isReviewValid } from "./isReviewValid.ts";
 
   type PostMode = {
@@ -85,6 +87,14 @@
   // A gif waives the word minimum, and native validity only re-reads the
   // textarea on input - so the submit gate is spelled out here instead.
   const isSubmittable = $derived(gif != null || isReviewValid(comment));
+  const wordCountHint = $derived(
+    isSubmittable
+      ? undefined
+      : m.text_review_word_count({
+          count: countReviewWords(comment),
+          minimum: MIN_REVIEW_WORDS,
+        }),
+  );
 
   const { postComment, isCommenting, error } = usePostComment();
   const { mentions } = useMediaMentions(
@@ -140,6 +150,29 @@
   />
 {/snippet}
 
+{#snippet selectedGif()}
+  {#if gif}
+    <div
+      class="review-gif"
+      transition:slide={{
+        axis: "x",
+        duration: motion(250),
+        easing: cubicOut,
+      }}
+    >
+      {#key gif.url}
+        <div in:gifPop={{ delay: 80, duration: motion(450) }}>
+          <SelectedGif
+            {gif}
+            disabled={$isCommenting}
+            onRemove={() => (gif = null)}
+          />
+        </div>
+      {/key}
+    </div>
+  {/if}
+{/snippet}
+
 {#snippet badge()}
   <SpoilerSwitch
     disabled={$isCommenting}
@@ -163,6 +196,8 @@
     onCancel={onClose}
     disabled={$isCommenting}
     isValid={isSubmittable}
+    inlineActions
+    confirmButtonFill="solid"
     confirmButtonText={isEditing
       ? m.button_text_edit_comment()
       : m.button_text_add_review()}
@@ -180,34 +215,9 @@
           value={comment}
           {actions}
           mentions={$mentions}
-          validation={gif
-            ? undefined
-            : {
-                isValid: isReviewValid,
-                errorText: m.translated_value_error_comment_invalid_content(),
-              }}
+          hint={wordCountHint}
+          attachment={selectedGif}
         />
-
-        {#if gif}
-          <div
-            class="review-gif"
-            transition:slide={{
-              axis: "x",
-              duration: motion(250),
-              easing: cubicOut,
-            }}
-          >
-            {#key gif.url}
-              <div in:gifPop={{ delay: 80, duration: motion(450) }}>
-                <SelectedGif
-                  {gif}
-                  disabled={$isCommenting}
-                  onRemove={() => (gif = null)}
-                />
-              </div>
-            {/key}
-          </div>
-        {/if}
       </div>
 
       {#if $error}
@@ -236,16 +246,12 @@
 
   .review-composer {
     container-type: inline-size;
-
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: start;
   }
 
   .review-gif {
     padding-inline-start: var(--gap-xs);
 
-    --selected-gif-height: calc(5lh + 2 * var(--ni-12));
+    --selected-gif-height: var(--ni-144);
     --selected-gif-max-width: min(var(--ni-160), 40cqi);
     --selected-gif-max-height: none;
   }
